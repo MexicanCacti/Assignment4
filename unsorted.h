@@ -1,14 +1,5 @@
-/***************************************************************************************
-*    Title: C++ Plus Data Structures SIXTH EDITION
-*    Author: Nell Dale, Chip Weems
-*    Date: 09/14/2023
-*    Code version: C++11
-*    Availability: Chapter 3
-*
-***************************************************************************************/
-
-#ifndef UNSORTEDTYPE_H
-#define UNSORTEDTYPE_H
+#ifndef UNSORTED_H
+#define UNSORTED_H
 
 #include "ItemType.h" 
 // File ItemType.h must be provided by the user of this class. 
@@ -79,13 +70,10 @@ public:
   // Post: Current position is updated to next position.
   //       item is a copy of element at current position.
 
-  ItemType GetItemIndex(const int) const;
-  
-  void SetItemIndex(const int, ItemType);
+  void ChangeList(int, ItemType);
 private:
   int length;
   ItemType info[MAX_ITEMS];
   int currentPos;
 };
-
 #endif

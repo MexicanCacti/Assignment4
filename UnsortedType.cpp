@@ -12,6 +12,7 @@
 UnsortedType::UnsortedType()
 {
   length = 0;
+  currentPos = -1;
 }
 bool UnsortedType::IsFull() const
 {
@@ -90,3 +91,11 @@ ItemType UnsortedType::GetNextItem()
   return info[currentPos];
 }
 
+ItemType UnsortedType::GetItemIndex(const int index) const {
+  return info[index];
+}
+
+void UnsortedType::SetItemIndex(const int index, ItemType item) {
+  info[index] = item;
+
+}

@@ -37,3 +37,10 @@ void Student::calcOverall(float pPer, float tPer, float fPer, std::ostream& out)
   // put formula for calculating overall with relative percent
   this->overallGrade = 0;
 }
+
+void Student::outputInfo(std::ostream& out) {
+  out << lastName << " " << firstName << " " << ID << " " << pGradeAvg << " " << tGradeAvg << " " << fGradeAvg << " " << overallGrade << std::endl;
+  // output list of programming scores
+  // output list of test scores
+  // output list of final scores
+}

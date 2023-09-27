@@ -26,5 +26,6 @@ class Student {
     void changeF(int fNum, float fVal, std::ostream& out);                          // change final exam grade
     void calcOverall(float pPer, float tPer, float fPer, std::ostream& out);
     inline float getOverall() {return overallGrade;}
+    void outputInfo(std::ostream& out);                                                  // outputs all of the student information in a line
 };
 #endif

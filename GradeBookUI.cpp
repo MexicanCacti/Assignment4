@@ -6,6 +6,7 @@
 #include <cstring>
 
 #include "SortedType.h"
+#include "Student.h"
 using namespace std;
 
 struct GradeBook {
@@ -18,6 +19,7 @@ struct GradeBook {
   GradeBook();
   void setUp(int, float, int, float, int, float);
   void clear();
+  void outputValues(ostream&) const;
 };
 
 GradeBook::GradeBook() {
@@ -34,7 +36,7 @@ void GradeBook::setUp(int pAmount, float pPerc, int tAmount, float tPerc, int fA
   pPer = pPerc;
   tNum = tAmount;
   tPer = tPerc;
-  fNum = fPerc;
+  fNum = fAmount;
   fPer = fPerc;
 }
 void GradeBook::clear() {
@@ -44,6 +46,10 @@ void GradeBook::clear() {
   tPer = 0.0;
   fNum = 0;
   fPer = 0.0;
+}
+
+void GradeBook::outputValues(ostream& out) const {
+  out << pNum << " " << pPer << " " << tNum << " " << tPer << " " << fNum << " " << fPer << endl;
 }
 
 // these are to set what the max/min # of programs/tests/finals to user can input when setting up... keep in mind ItemType.h will need MAXITEMS to be updated to whatever the largest number is from this list
@@ -58,14 +64,14 @@ const int MIN_FINALS = 0;
 // user choice menu
 void Menu(char&);
 
-void setUpSemester(GradeBook&, ostream&); // ostream to pass it outfile for Grades.trn
+void setUpSemester(SortedType&, GradeBook&, ostream&); // ostream to pass it outfile for Grades.trn
 void addStudent(SortedType&, ostream&);
 void recordProgramming(SortedType&, ostream&);
 void recordTest(SortedType&, ostream&);
 void recordFinal(SortedType&, ostream&);
 void changeGrade(SortedType&, ostream&);
 void calculateGrade(SortedType&, ostream&);
-void retrieveData(SortedType&, GradeBook&, ifstream&); // retrieves data from dat file -> update GradeBook info, all Student info
+void retrieveData(SortedType&, GradeBook&, ifstream&, ostream& out); // retrieves data from dat file -> update GradeBook info, all Student info
 void storeData(SortedType&, GradeBook&, ostream&);     // stores data to dat file -> GradeBook info, Stores all Student info
 
 int main() {
@@ -78,33 +84,31 @@ int main() {
   inFile.open("Grades.dat");
   outFile.open("Grades.trn");
   
-  /* CHECK IF DAT FILE EMPTY, FORCE USER TO SET UP NEW SEMESTER
-  if ( ) {
+  if (inFile.peek() == EOF) {
     while (userChoice != 'Q' && userChoice != 'S') {
       cout << "First time running program, Press S to set up a new semester or Q to quit: ";
       cin >> userChoice;
       userChoice = toupper(userChoice);
     }
+    if (userChoice == 'Q') {
+      inFile.close();
+      return 0;
+    }
+    if (userChoice == 'S') {
+      setUpSemester(Students, GradeBook, outFile);
+    }
   }
-  if (userChoice == 'Q') {
-    inFile.close();
-    return 0;
+  else {
+    retrieveData(Students, GradeBook, inFile, outFile);
   }
-  if (userChoice == 'S') {
-    setUpSemester(GradeBook, outFile);
-  }
-  */
   
-  //open grades.dat and store data, if empty make it so the user has to choose a new semester -> if first line is blank in other words.
-  // then close grades.dat
   inFile.close();
   
   Menu(userChoice);
-  // during while loop make sure to update to grade.trn
   while (userChoice != 'Q') {
     switch (userChoice) {
       case 'S':  
-        setUpSemester(GradeBook, outFile);
+        setUpSemester(Students, GradeBook, outFile);
         break;
       case 'A':
         addStudent(Students, outFile);
@@ -121,12 +125,13 @@ int main() {
     }
     Menu(userChoice);
   }
+  
+  outFile << "Stored data to Grades.dat" << endl;
   outFile.close();
-  
-  
   outFile.open("Grades.dat");
   
-  // store all data into grades.dat
+  // store data into Grades.dat
+  storeData(Students, GradeBook, outFile);
 
   outFile.close();
   
@@ -150,7 +155,6 @@ void Menu(char& Choice) {
 
   // ascii values for a -> z : 97 -> 122
   // ascii values for A -> Z : 65 -> 90
-  // change while loop so that it also checks if it is one of the valid choices above!!!
   cin >> Choice;
   while (true) {
     Choice = toupper(Choice);
@@ -166,13 +170,14 @@ void Menu(char& Choice) {
     case 'Q': return;
     }
     cout << "Not a valid input. Please look above for the valid characters." << endl;
-    cin.ignore(10000, '\n');    // just so if user types in a string of letters/numbers/symbols, only checks the first letter/number/symbol... otherwise will use every input to check before prompting a new input
+    cin.ignore(1000, '\n');    // just so if user types in a string of letters/numbers/symbols, only checks the first letter/number/symbol... otherwise will use every input to check before prompting a new input
     cin >> Choice;
   }
   return;
 }
-void setUpSemester(GradeBook& GradeBook, ostream& out) {
+void setUpSemester(SortedType& Students, GradeBook& GradeBook, ostream& out) {
   GradeBook.clear();
+  Students.MakeEmpty();
   
   int pAmount = 0;
   int tAmount = 0;
@@ -184,43 +189,68 @@ void setUpSemester(GradeBook& GradeBook, ostream& out) {
   
   cout << "# of Programming Assignments: ";
   cin >> pAmount;
-  while (pAmount < MIN_PROGRAMS || pAmount > MAX_PROGRAMS) {
+  while (pAmount < MIN_PROGRAMS || pAmount > MAX_PROGRAMS || cin.fail()) {
+    cin.clear();
+    cin.ignore(1000, '\n');
     cout << "\nInput in range " << MIN_PROGRAMS << " -> " << MAX_PROGRAMS << endl;
     cout << "# of Programming Assignments: ";
     cin >> pAmount;
   }
-  
+  cin.ignore(1000, '\n');
+
   cout << "# of Tests: ";
   cin >> tAmount;
-  while (tAmount < MIN_TESTS || tAmount > MAX_TESTS) {
+  while (tAmount < MIN_TESTS || tAmount > MAX_TESTS || cin.fail()) {
+    cin.clear();
+    cin.ignore(1000, '\n');
     cout << "\nInput in range " << MIN_TESTS << " -> " << MAX_TESTS << endl;
     cout << "# of Tests: ";
     cin >> tAmount;
   }
+  cin.ignore(1000, '\n');
   
   cout << "# of Finals: ";
   cin >> fAmount;
-  while (fAmount < MIN_FINALS || fAmount > MAX_FINALS) {
+  while (fAmount < MIN_FINALS || fAmount > MAX_FINALS || cin.fail()) {
+    cin.clear();
+    cin.ignore(1000, '\n');
     cout << "\nInput in range " << MIN_FINALS << " -> " << MAX_FINALS << endl;
     cout << "# of Finals: ";
     cin >> fAmount;
   }
+  cin.ignore(1000, '\n');
   
-  cout << "\nRelative % of Programs: ";
-  cin >> pPerc;
-  cout << "\nRelative % of Tests: ";
-  cin >> tPerc;
-  cout << "\nRelative % of Finals: ";
-  cin >> fPerc;
-  
-  while (pPerc + tPerc + fPerc != 100) {
-    cout << "\nPlease check that the relative % add up to 100" << endl;
+  while (pPerc + tPerc + fPerc != 100.0) {
+    cout << "\nMake sure that the relative %s add up to 100" << endl;
     cout << "\nRelative % of Programs: ";
     cin >> pPerc;
+    while (cin.fail()) {
+      cin.clear();
+      cin.ignore(1000, '\n');
+      cout << "\nInput a number please: ";
+      cin >>pPerc;
+    }
+    cin.ignore(1000, '\n');
+
     cout << "\nRelative % of Tests: ";
     cin >> tPerc;
+    while (cin.fail()) {
+      cin.clear();
+      cin.ignore(1000, '\n');
+      cout << "\nInput a number please: ";
+      cin >> tPerc;
+    }
+    cin.ignore(1000, '\n');
+
     cout << "\nRelative % of Finals: ";
     cin >> fPerc;
+    while (cin.fail()) {
+      cin.clear();
+      cin.ignore(1000, '\n');
+      cout << "\nInput a number please: ";
+      cin >> fPerc;
+    }
+    cin.ignore(1000, '\n');
   }
     GradeBook.setUp(pAmount, pPerc, tAmount, tPerc, fAmount, fPerc);
 
@@ -232,10 +262,38 @@ void setUpSemester(GradeBook& GradeBook, ostream& out) {
   
 }
 void addStudent(SortedType& Students, ostream& out) {
+  string lastName;
+  string firstName;
+  int studentNumber = 0;
+  ItemType item;
+  cout << "Enter Student's last name: ";
+  cin.ignore(1000, '\n');
+  getline(cin, lastName);
+  // resize so max string length is 20, if less -> fills with spaces
+  lastName.resize(20);
+  cout << "\nEnter Student's first name: ";
+  getline(cin,firstName);
+  firstName.resize(20);
+  
+  cout << "\nEnter Student's ID number: ";
+  cin >> studentNumber;
+  while (studentNumber < 0 || studentNumber > 9999 || cin.fail()) {
+    cin.clear();
+    cin.ignore(1000, '\n');
+    cout << "\nStudent number needs to be in range 0 -> 9999\nEnter Student's ID number: ";
+    cin >> studentNumber;
+  }
+  cin.ignore(1000, '\n');
 
+  Student newStudent(lastName, firstName, studentNumber); // create a new student object
+  // add student to a list
+  
+  // FIX OUTPUTTING TO LOOK MORE OFFICIAL!!!!
+  out << "Student Added" << endl;
+  out << "\tLastName: " << lastName << "\tFirstName: " << firstName << "\tID Number: " << studentNumber << endl;
 }
 void recordProgramming(SortedType& Students, ostream& out) {
-
+  // have a while loop to eval the program # is > 0 && < Students.Programs.getLength()
 }
 void recordTest(SortedType& Students, ostream& out) {
 
@@ -243,9 +301,40 @@ void recordTest(SortedType& Students, ostream& out) {
 void recordFinal(SortedType& Students, ostream& out) {
 
 }
-void retrieveData(SortedType& Students, GradeBook& Gradebook, ifstream& in) {
-
+void retrieveData(SortedType& Students, GradeBook& Gradebook, ifstream& in, ostream& out) {
+  int pNum = 0;
+  float pPer = 0.0;
+  int tNum = 0;
+  float tPer = 0.0;
+  int fNum = 0;
+  float fPer = 0.0;
+  
+  // sets up the gradebook to be what was last inputted
+  in >> pNum;
+  in.ignore();
+  in >> pPer;
+  in.ignore();
+  in >> tNum;
+  in.ignore();
+  in >> tPer;
+  in.ignore();
+  in >> fNum;
+  in.ignore();
+  in >> fPer;
+  Gradebook.setUp(pNum, pPer, tNum, tPer, fNum, fPer);
+  
+  // every line after this should contain all the info to create a student object
+  
+  out << "Previous Data Inputted" << endl;
+  
 }
 void storeData(SortedType& Students, GradeBook& GradeBook, ostream& out) {
-
+  // stores the gradebook values onto one line... # of each type of assignment, percentages
+  GradeBook.outputValues(out);
+  
+  // stores all info of student object onto one line
+  Students.ResetList();
+  for (int i = 0; i < Students.GetLength(); i++) {
+    Students.GetNextItem().Print(out);
+  }
 }
