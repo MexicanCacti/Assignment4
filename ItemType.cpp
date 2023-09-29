@@ -1,4 +1,11 @@
-// The following definitions go into file ItemType.cpp. 
+/***************************************************************************************
+*    Title: C++ Plus Data Structures SIXTH EDITION
+*    Author: Nell Dale, Chip Weems
+*    Date: 09/14/2023
+*    Code version: C++11
+*    Availability: Chapter 3
+*
+***************************************************************************************/
 #include <fstream>
 #include <iostream>
 #include "ItemType.h"
@@ -21,7 +28,6 @@ void ItemType::Initialize(int number)
 {
   value = number;
 }
-
 void ItemType::Print(std::ostream& out) const
 // pre:  out has been opened.
 // post: value has been sent to the stream out.

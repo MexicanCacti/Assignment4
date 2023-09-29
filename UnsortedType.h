@@ -21,16 +21,16 @@
 //       GREATER, if self "comes after" item 
 //       EQUAL, if self and item are the same 
 
-class UnsortedType 
+class UnsortedType
 {
 public:
   UnsortedType();
   // Constructor
-  
+
   void MakeEmpty();
   // Function: Returns the list to the empty state.
   // Post:  List is empty.
-  
+
   bool IsFull() const;
   // Function:  Determines whether list is full.
   // Pre:  List has been initialized.
@@ -79,6 +79,14 @@ public:
   // Post: Current position is updated to next position.
   //       item is a copy of element at current position.
 
+<<<<<<< Updated upstream
+=======
+  ItemType GetItemIndex(const int) const;
+
+  void SetItemIndex(int, ItemType);
+  
+  void setLength(const int l) {length = l;}
+>>>>>>> Stashed changes
 private:
   int length;
   ItemType info[MAX_ITEMS];

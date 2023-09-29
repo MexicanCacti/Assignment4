@@ -8,6 +8,7 @@
 ***************************************************************************************/
 
 #include "UnsortedType.h"
+#include <iostream>
 
 UnsortedType::UnsortedType()
 {
@@ -22,7 +23,7 @@ int UnsortedType::GetLength() const
   return length;
 }
 
-ItemType UnsortedType::GetItem(ItemType item, bool& found) 
+ItemType UnsortedType::GetItem(ItemType item, bool& found)
 // Pre:  Key member(s) of item is initialized. 
 // Post: If found, item's key matches an element's key in the 
 //       list and a copy of that element has been returned;
@@ -34,17 +35,17 @@ ItemType UnsortedType::GetItem(ItemType item, bool& found)
 
   moreToSearch = (location < length);
 
-  while (moreToSearch && !found) 
+  while (moreToSearch && !found)
   {
     switch (item.ComparedTo(info[location]))
     {
-      case LESS    : 
-      case GREATER : location++;
-                     moreToSearch = (location < length);
-                     break;
-      case EQUAL   : found = true;
-                     item = info[location];
-                     break;
+    case LESS:
+    case GREATER: location++;
+      moreToSearch = (location < length);
+      break;
+    case EQUAL: found = true;
+      item = info[location];
+      break;
     }
   }
   return item;
@@ -90,3 +91,13 @@ ItemType UnsortedType::GetNextItem()
   return info[currentPos];
 }
 
+<<<<<<< Updated upstream
+=======
+ItemType UnsortedType::GetItemIndex(const int index) const {
+  return info[index];
+}
+
+void UnsortedType::SetItemIndex(int index, ItemType item) {
+  info[index] = item;
+}
+>>>>>>> Stashed changes
